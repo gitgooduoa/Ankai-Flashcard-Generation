@@ -1,31 +1,30 @@
-# Ankai-Flashcard-Generation
+# AnkAI Flashcard Generation
 
-This project was created using the [Ktor Project Generator](https://start.ktor.io).
-
-Here are some useful links to get you started:
-
-- [Ktor Documentation](https://ktor.io/docs/home.html)
-- [Ktor GitHub page](https://github.com/ktorio/ktor)
-- The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need
-  to [request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
+AnkAI Flashcard Generation is a backend service that uses AI to transform notes into flashcards.
 
 ## Features
 
-Here's a list of features included in this project:
+- **AI-Powered Flashcard Generation**: Automatically create flashcards (title, question, answer) from simple notes.
 
-| Name                                                                   | Description                                                                        |
-|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| [Compression](https://start.ktor.io/p/compression)                     | Compresses responses using encoding algorithms like GZIP                           |
-| [CORS](https://start.ktor.io/p/cors)                                   | Enables Cross-Origin Resource Sharing (CORS)                                       |
-| [Routing](https://start.ktor.io/p/routing)                             | Provides a structured routing DSL                                                  |
-| [Swagger](https://start.ktor.io/p/swagger)                             | Serves Swagger UI for your project                                                 |
-| [Call Logging](https://start.ktor.io/p/call-logging)                   | Logs client requests                                                               |
-| [Content Negotiation](https://start.ktor.io/p/content-negotiation)     | Provides automatic content conversion according to Content-Type and Accept headers |
-| [kotlinx.serialization](https://start.ktor.io/p/kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library                     |
-| [HTML DSL](https://start.ktor.io/p/html-dsl)                           | Generates HTML from Kotlin DSL                                                     |
-| [Exposed](https://start.ktor.io/p/exposed)                             | Adds Exposed database to your application                                          |
+## Prerequisites
 
-## Building & Running
+- **JDK 21+**
+- **OpenRouter API Key**: Obtain an API key from [OpenRouter](https://openrouter.ai/).
+
+## Setup & Configuration
+
+1. **Environment Variable**: Set your OpenRouter API key as an environment variable
+2. **Run the Server**:
+   ```bash
+   ./gradlew run
+   ```
+   The server will start at `http://localhost:8080`.
+
+## API Documentation
+
+**Available At**: `/api/openapi`
+
+## Building
 
 To build or run the project, use one of the following tasks:
 
@@ -35,14 +34,4 @@ To build or run the project, use one of the following tasks:
 | `./gradlew build`                       | Build everything                                                     |
 | `./gradlew buildFatJar`                 | Build an executable JAR of the server with all dependencies included |
 | `./gradlew buildImage`                  | Build the docker image to use with the fat JAR                       |
-| `./gradlew publishImageToLocalRegistry` | Publish the docker image locally                                     |
 | `./gradlew run`                         | Run the server                                                       |
-| `./gradlew runDocker`                   | Run using the local docker image                                     |
-
-If the server starts successfully, you'll see the following output:
-
-```
-2024-12-04 14:32:45.584 [main] INFO  Application - Application started in 0.303 seconds.
-2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
-```
-

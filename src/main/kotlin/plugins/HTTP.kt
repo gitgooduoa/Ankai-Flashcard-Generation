@@ -25,7 +25,7 @@ fun Application.configureHTTP() {
         json()
     }
     routing {
-        swaggerUI(path = "openapi") {
+        swaggerUI(path = "/api/openapi") {
             info = OpenApiInfo(title = "Flashcard Generation API", version = "1.0.0")
             source = OpenApiDocSource.Routing(ContentType.Application.Json) {
                 routingRoot.descendants()
