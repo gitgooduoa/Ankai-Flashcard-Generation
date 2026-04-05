@@ -1,55 +1,56 @@
 package dev.apollointhehouse
 
-import dev.apollointhehouse.models.Flashcard
-import dev.apollointhehouse.models.Message
+import com.google.genai.types.GenerateContentResponse
+import dev.apollointhehouse.models.GeminiResponse
 import dev.apollointhehouse.models.Note
-import dev.apollointhehouse.models.OpenRouterRequest
-import dev.apollointhehouse.models.OpenRouterResponse
-import dev.apollointhehouse.models.ResponseFormat
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import kotlinx.serialization.json.Json
-
-private const val OPEN_ROUTER = "https://openrouter.ai/api/v1/chat/completions"
+import models.Flashcard
 
 object API {
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-            })
-        }
+    private val apiKey = System.getenv("GEMINI_KEY")
+    private val client = Client {
+        apiKey(apiKey)
     }
 
-    private val apiKey = System.getenv("OPEN_ROUTER")
-
-    suspend fun genRequest(note: Note): Flashcard {
-        val response: OpenRouterResponse = client.post(OPEN_ROUTER) {
-            header(HttpHeaders.Authorization, "Bearer $apiKey")
-            contentType(ContentType.Application.Json)
-            setBody(
-                OpenRouterRequest(
-                    messages = listOf(
-                        Message(
-                            role = "system",
-                            content = "You are a flashcard generator. Given a note title and content, generate a flashcard answer. Return only a JSON object with 'title', 'question', and 'answer' fields. The question should be the note content, and the answer should be a concise explanation or summary."
-                        ),
-                        Message(
-                            role = "user",
-                            content = "Title: ${note.title}\nContent: ${note.content}"
+    suspend fun genRequest(note: Note): List<Flashcard> = runInterruptible(Dispatchers.IO) {
+        val response: GenerateContentResponse =
+            client.models.generateContent(
+                model = "gemini-2.5-flash",
+                text = "Title: ${note.title}\nContent: ${note.content}",
+                config = GenerateContentConfig {
+                    systemInstruction {
+                        role("system")
+                        parts(
+                            Part {
+                                text("You are a flashcard generator. Given a note title and content, generate an array of flashcards. Each flashcard should be on one part of the note content, try to keep it concise. Either side of each card should act as both a question and answer for the other side.")
+                            }
                         )
-                    ),
-                )
-            )
-        }.also { println(it.bodyAsText()) }.body()
+                    }
 
-        val content = response.choices.firstOrNull()?.message?.content ?: throw Exception("Failed to generate flashcard")
-        return Json.decodeFromString<Flashcard>(content)
+                    responseMimeType("application/json")
+                    responseSchema(Schema {
+                        type("array")
+                        items(Schema {
+                            type("object")
+                            properties(
+                                mapOf(
+                                    "front" to Schema { type("string") },
+                                    "back" to Schema { type("string") },
+                                )
+                            )
+                        })
+                    })
+                }
+            )
+
+        val json = response.text()
+            ?.substringAfter("```json")
+            ?.substringBefore("```")
+            ?: throw IllegalStateException("Unable to generate content for note ${note.title}")
+        val geminiResponse: List<GeminiResponse> = Json.decodeFromString(json)
+
+        geminiResponse.map { Flashcard(it.front, it.back) }
     }
 }

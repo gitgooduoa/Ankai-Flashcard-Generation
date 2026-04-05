@@ -10,6 +10,7 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.openapi.*
+import kotlinx.serialization.json.Json
 
 fun Application.configureHTTP() {
     install(Compression)
@@ -22,7 +23,9 @@ fun Application.configureHTTP() {
         anyHost()
     }
     install(ContentNegotiation) {
-        json()
+        json(Json {
+            ignoreUnknownKeys = true
+        })
     }
     routing {
         swaggerUI(path = "/api/openapi") {

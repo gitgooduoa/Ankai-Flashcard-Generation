@@ -1,10 +1,9 @@
-package dev.apollointhehouse.models
+package models
 
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Flashcard(
-    val title: String,
-    val question: String,
-    val answer: String
+    val front: String,
+    val back: String,
 )
